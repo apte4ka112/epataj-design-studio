@@ -1,0 +1,111 @@
+@use 'sass:math';
+@import url('https://fonts.googleapis.com/css2?family=Onest:wght@100;200;300;400;500;600;700;800;900&display=swap');
+:root {
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+
+    color-scheme: light dark;
+    color: rgba(255, 255, 255, 0.87);
+    background-color: var(--color-bg);
+
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    --color-bg: #14181a;
+    --color-brand: #ff2070;
+    --color-secondory: #363f48;
+    --color-secondory-bg-hover: #454e56;
+    --color-secondory-text: #9ba7b4;
+    --color-secondory-text-hover: #fff;
+}
+
+a {
+    font-weight: 500;
+    color: #646cff;
+    text-decoration: inherit;
+}
+a:hover {
+    color: #535bf2;
+}
+html {
+    overflow: auto;
+}
+
+body {
+    margin: 0;
+    display: flex;
+    min-width: 320px;
+    min-height: 100vh;
+    font-family: 'Onest', sans-serif;
+    overflow: hidden;
+}
+
+h1 {
+    font-size: 3.2em;
+    line-height: 1.1;
+}
+.button {
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+}
+.button {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    padding: 8px 20px;
+    border-radius: 24px;
+    gap: 10px;
+    background: var(--color-brand);
+    color: #fff;
+    transition: all 0.2s ease-out;
+    user-select: none;
+    &-secondary {
+    }
+    &-icon {
+        padding-left: 12px;
+    }
+}
+.button:hover {
+    background: var(--color-secondory);
+    color: #fff;
+}
+
+#__nuxt {
+    max-width: 1280px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 20px 0 20px;
+    text-align: center;
+    box-sizing: border-box;
+    @media (max-width: 768px) {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+}
+
+@media (prefers-color-scheme: light) {
+    :root {
+        color: #213547;
+        --color-bg: #fff;
+        --color-secondory: #e9eff2;
+        --color-secondory-text: #374957;
+        --color-secondory-text-hover: #374957;
+        --color-secondory-bg-hover: #d9e5e6;
+    }
+    a:hover {
+        color: #747bff;
+    }
+    .button:hover {
+        color: #fff;
+        background: var(--color-secondory-text-hover);
+    }
+}
+img {
+    display: block;
+}
+* {
+    box-sizing: border-box;
+}
