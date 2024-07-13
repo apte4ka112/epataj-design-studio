@@ -16,5 +16,6 @@ export default defineNuxtConfig({
     '@/assets/animate.css'
   ],
 
-  modules: ['@nuxt/eslint']
+  modules: ['@nuxt/eslint', '../modules/nuxt-api'],
+
 })

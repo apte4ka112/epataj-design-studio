@@ -1,83 +1,27 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { useLazyAsyncData } from '#app' // Импортируем функцию useLazyAsyncData из Nuxt 3
 
+import { onMounted, ref } from 'vue'
 import Card from '../components/Card.vue'
 import Isotope from 'isotope-layout'
 import imagesLoaded from 'imagesloaded'
 import Filter from '../components/Filter.vue'
 const activeTabs = ref('all')
-
-const cards = ref([
-  // {
-  //   image: 'https://img.brandshop.ru/cache/products/c/ctm-tdbb-0_1104x1104.jpg',
-  //   name: 'Анимированные картинки нового поколения',
-  //   category: {
-  //     name: 'brand',
-  //     title: 'Бренды'
-  //   }
-  // },
-  //
-  // {
-  //   image: 'https://img.artlebedev.ru/everything/akkuyu/morda/akkuyu-cover-1200.png',
-  //   video: 'https://img.artlebedev.ru/everything/akkuyu/morda/akkuyu-cover-1200.mp4',
-  //   category: {
-  //     name: 'site',
-  //     title: 'Сайты',
-  //     list: [
-  //       {
-  //         name: 'lend',
-  //         title: 'lend'
-  //       }
-  //     ]
-  //   },
-  //   name: 'Анимированные картинки нового поколения'
-  // },
-  //
-  // {
-  //   image: 'https://img.artlebedev.ru/everything_files/images/9289/metro-promo-photo-1200.jpg.webp',
-  //   name: 'Анимированные картинки нового поколения',
-  //   category: 'desing'
-  // },
-  // {
-  //   image: 'https://img.artlebedev.ru/everything/atach/identity/morda/atach-1200.jpg',
-  //   video: 'https://img.artlebedev.ru/everything/atach/identity/morda/atach-1200.mp4',
-  //   category: {
-  //     name: 'site',
-  //     title: 'Сайты',
-  //     list: [
-  //       {
-  //         name: 'corparat',
-  //         title: 'corparat'
-  //       }
-  //     ]
-  //   },
-  //   name: 'Анимированные '
-  // },
-  // {
-  //   image: 'https://img.brandshop.ru/cache/products/m/men_home_20240123_677x724.jpg',
-  //   name: 'Анимированные картинки нового поколения',
-  //   category: 'desing'
-  // },
-  // {
-  //   video: 'https://img.artlebedev.ru/everything/mokapus/morda/mokapus-morda-xl.mp4',
-  //   name: 'Анимированные картинки нового поколения'
-  // }
-])
-
+const cards = ref([])
 const grid = ref(null)
 const loadingItems = ref(false)
-let iso = null
 const loading = ref(true)
+let iso = null
+const { articlesAPIClient } = useAPI()
 
 const filterItems = (item) => {
-  activeTabs.value = null
-  if (iso) {
-    iso.arrange({
-      filter: item.url === '*' ? '*' : '.' + item.url,
-      sortBy: 'number'
-    })
-  }
+  activeTabs.value = item.url
+  iso?.arrange({
+    filter: item.url === '*' ? '*' : '.' + item.url,
+    sortBy: 'number'
+  })
 }
+
 const updateItems = () => {
   imagesLoaded(grid.value, () => {
     iso = new Isotope(grid.value, {
@@ -87,33 +31,39 @@ const updateItems = () => {
         percentPosition: true
       }
     })
-
     loadingItems.value = true
-
     iso.layout()
   })
 }
+const { data: fetchedData, pending, error } = useLazyAsyncData('news', async () => {
+  return await articlesAPIClient.getArticles()
+});
+
+
+// Обработка данных после получения
+const processFetchedData = () => {
+  if (fetchedData.value) {
+    cards.value = fetchedData.value.documents
+    loading.value = false
+    updateItems()
+  } else if (error.value) {
+    console.error(error.value);
+    loading.value = false;
+  }
+}
+
+// Следим за изменениями данных и обновляем состояние компонента
+watchEffect(() => {
+  loading.value = pending.value;
+  if (fetchedData.value || error.value) {
+    processFetchedData();
+  }
+})
+
+// Вызываем updateItems по монтированию компонента
 onMounted(() => {
   updateItems()
 })
-
-
-const { data, pending, error } = await useFetch(async () => {
-  try {
-    const response = await DB.listDocuments("epataj-database", "news");
-    cards.value = response.documents;
-    return { news: response.documents };
-  } catch (err) {
-    return { news: null };
-  } finally {
-    setTimeout(() => {
-      loading.value = false
-      updateItems()
-    },500)
-  }
-}, {
-  lazy: true
-});
 </script>
 
 <template>

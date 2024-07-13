@@ -1,89 +1,56 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useLazyAsyncData } from '#app'
+
 import menuIcon from '../assets/icon/menu.vue'
 import siteIcon from '../assets/icon/site.vue'
 import logoSmall from '../assets/icon/logo-small.vue'
 import smiIcon from '../assets/icon/smi.vue'
 import reklamaIcon from '../assets/icon/reklama.vue'
 import newsIcon from '../assets/icon/news.vue'
+
 const activeTabs = ref(0)
 const emit = defineEmits(['setFilter'])
 const loading = ref(true)
-const navigation = ref([
-  // {
-  //   name: '*',
-  //   title: 'Все',
-  //   id: 0,
-  //   icon: menuIcon,
-  //   category: [{ title: 'Лендинги', name: '.lend', id: 2 }],
-  //   link: '#'
-  // },
-  // {
-  //   name: '.site',
-  //   title: 'Сайты',
-  //   icon: siteIcon,
-  //   category: [
-  //     { title: 'Корпаративные сайты', name: '.corparat', id: 2 },
-  //     { title: 'Лендинги', id: 3, name: '.lend' }
-  //   ],
-  //   link: '#'
-  // },
-  // {
-  //   name: '.brand',
-  //   title: 'Бренды',
-  //   icon: logoSmall,
-  //   link: '#'
-  // },
-  // {
-  //   title: 'СММ',
-  //   icon: smiIcon,
-  //   link: '#'
-  // },
-  // {
-  //   title: 'Реклама',
-  //   icon: reklamaIcon,
-  //   link: '#'
-  // },
-  // {
-  //   title: 'Статьи',
-  //   icon: newsIcon,
-  //   link: '#'
-  // }
-])
+const navigation = ref([])
 
-const { data, pending, error } = await useFetch(async () => {
-  try {
-    const response = await DB.listDocuments("epataj-database", "categories");
+const { categoriesAPIClient } = useAPI()
 
-    navigation.value = response.documents;
-    return { news: response.documents };
-  } catch (err) {
-    // fetchError.value = err;
-    console.error(err);
-    return { news: null };
-  } finally {
+const getNameComponent = (item) => {
+  const icons = {
+    site: siteIcon,
+    brand: logoSmall,
+    smi: smiIcon,
+    reklama: reklamaIcon,
+    news: newsIcon
+  }
+  return icons[item.code] || menuIcon
+}
+
+// Используем useLazyAsyncData для получения данных
+const { data: fetchedData, pending, error } = useLazyAsyncData('categories', async () => {
+  return await categoriesAPIClient.getCategories()
+});
+
+// Обработка данных после получения
+const processFetchedData = () => {
+  if (fetchedData.value) {
+    navigation.value = fetchedData.value.documents;
+    loading.value = false;
+  } else if (error.value) {
+    console.error(error.value);
     loading.value = false;
   }
-}, {
-  lazy: true
-});
-const getNameComponent = (item) => {
-  switch (item.code)
-  {
-    case 'site':
-      return siteIcon
-    case 'brand':
-      return logoSmall
-    case 'smi':
-      return 'smiIcon'
-    case 'reklama':
-      return 'reklamaIcon'
-    case 'news':
-      return 'newsIcon'
-    default:
-      return menuIcon
-  }
 }
+
+// Следим за изменениями данных и обновляем состояние компонента
+watchEffect(() => {
+  loading.value = pending.value;
+  if (fetchedData.value || error.value) {
+    processFetchedData();
+  }
+})
+
 
 </script>
 <template>

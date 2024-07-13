@@ -17,7 +17,6 @@
     "@nuxtjs/eslint-module": "^4.1.0",
     "@types/uuid": "^9.0.7",
     "nuxt": "^3.8.2",
-    "nuxt-appwrite": "^1.1.0",
     "sass": "^1.77.6",
     "vue": "^3.3.10",
     "vue-router": "^4.2.5"
